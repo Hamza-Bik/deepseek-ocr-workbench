@@ -1,0 +1,23 @@
+{
+ "id": "2bfbf4a7-deab-452d-b7d4-26df7b565160",
+ "type": "message",
+ "role": "assistant",
+ "model": "deepseek-flash",
+ "content": [
+  {
+   "type": "text",
+   "text": "{\"opening_balance\":\"58 979,50 CRÉDITEUR\",\"closing_balance\":\"62 140,80 CRÉDITEUR\",\"total_debit\":\"36 338,70\",\"total_credit\":\"39 500,00\",\"transactions\":[{\"code\":\"VIR\",\"date\":\"02/02/2026\",\"label\":\"VIR.RECU CLIENT MAGHREB TRADING SARL\",\"value\":\"02/02/2026\",\"debit\":\"\",\"credit\":\"25 000,00\",\"balance\":\"83 979,50\"},{\"code\":\"LOY\",\"date\":\"05/02/2026\",\"label\":\"VIR.EMIS LOYER LOCAL COMMERCIAL\",\"value\":\"05/02/2026\",\"debit\":\"6 000,00\",\"credit\":\"\",\"balance\":\"77 979,50\"},{\"code\":\"TEL\",\"date\":\"09/02/2026\",\"label\":\"PAIEMENT IAM FACTURE PRO\",\"value\":\"09/02/2026\",\"debit\":\"750,00\",\"credit\":\"\",\"balance\":\"77 229,50\"},{\"code\":\"VIR\",\"date\":\"12/02/2026\",\"label\":\"VIR.EMIS FOURNISSEUR HARDWARE CENTER\",\"value\":\"12/02/2026\",\"debit\":\"8 400,00\",\"credit\":\"\",\"balance\":\"68 829,50\"},{\"code\":\"VIR\",\"date\":\"15/02/2026\",\"label\":\"VIR.RECU CLIENT DIGI SERVICES MAROC\",\"value\":\"15/02/2026\",\"debit\":\"\",\"credit\":\"14 500,00\",\"balance\":\"83 329,50\"},{\"code\":\"CB\",\"date\":\"18/02/2026\",\"label\":\"PAIEMENT/CB FRAIS DE DEPLACEMENT\",\"value\":\"18/02/2026\",\"debit\":\"1 838,70\",\"credit\":\"\",\"balance\":\"81 490,80\"},{\"code\":\"FRA\",\"date\":\"22/02/2026\",\"label\":\"FRAIS DIVERS\",\"value\":\"22/02/2026\",\"debit\":\"150,00\",\"credit\":\"\",\"balance\":\"81 340,80\"},{\"code\":\"VIR\",\"date\":\"26/02/2026\",\"label\":\"VIR.EMIS HONORAIR COMPTABILITE\",\"value\":\"26/02/2026\",\"debit\":\"19 200,00\",\"credit\":\"\",\"balance\":\"62 140,80\"}]}"
+  }
+ ],
+ "stop_reason": "end_turn",
+ "usage": {
+  "input_tokens": 1308,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 1372,
+  "service_tier": "standard",
+  "output_tokens_details": {
+   "thinking_tokens": 857
+  }
+ }
+}

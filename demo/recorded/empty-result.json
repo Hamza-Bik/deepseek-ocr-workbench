@@ -1,0 +1,1 @@
+{"id": "ocr-23a998bf-66e5-4a8a-aa4e-fa9fc4542e4b", "object": "ocr.result", "created": 1794692758, "purpose": "text_recognition", "page_count": 1, "pages": [{"index": 0, "text": "", "finish_reason": "stop"}], "usage": {"input_tokens": 341, "output_tokens": 180, "total_tokens": 521}}

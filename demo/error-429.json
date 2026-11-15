@@ -1,0 +1,8 @@
+{
+  "error": {
+    "message": "Too many recognitions in progress",
+    "type": "account_concurrency_error",
+    "param": null,
+    "code": "account_concurrency_error"
+  }
+}

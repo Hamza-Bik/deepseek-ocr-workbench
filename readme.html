@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>How it works — OCR Workbench</title>
+<meta name="description" content="How the OCR Workbench works: purposes, result views, the block dialog, and the places where the live DeepSeek OCR API differs from its guide." />
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+<style>
+/* Standalone doc page. Shares the app's palette and type stack, but keeps its
+   own small stylesheet so it has no dependency on styles.css. */
+:root {
+  --paper: #f2f0ea;
+  --paper-edge: #e9e6de;
+  --surface: #fbfaf6;
+  --surface-raised: #ffffff;
+  --surface-sunken: #efece4;
+  --ink: #1a1915;
+  --ink-2: #57544a;
+  --ink-3: #6e6b61;
+  --ink-4: #6d6a60;
+  --line: #e2ded3;
+  --line-2: #d3cec1;
+  --line-strong: #bdb7a7;
+  --accent: #3352e0;
+  --accent-ink: #223cb4;
+  --accent-soft: #e8ebfb;
+  --accent-line: #b9c4f2;
+  --warn: #8a5c0d;
+  --warn-soft: #f6ecd8;
+  --shadow-sm: 0 1px 2px rgb(28 25 16 / 0.05), 0 1px 1px rgb(28 25 16 / 0.03);
+  --shadow-md: 0 2px 3px rgb(28 25 16 / 0.05), 0 6px 14px -6px rgb(28 25 16 / 0.14);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", "Source Serif 4", Georgia, serif;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;
+  --mono: "SF Mono", ui-monospace, "JetBrains Mono", "Roboto Mono", Menlo, monospace;
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  /* Same palette as styles.css: neutral charcoal ramp + dark blue chrome. */
+  --paper: #151517;
+  --paper-edge: #101011;
+  --surface: #1b1b1c;
+  --surface-raised: #242425;
+  --surface-sunken: #111112;
+  --ink: #ececeb;
+  --ink-2: #a9a9a8;
+  --ink-3: #969594;
+  --ink-4: #929190;
+  --line: #2b2b2d;
+  --line-2: #39393c;
+  --line-strong: #4c4c50;
+  --blue-paper: #1a1f25;
+  --blue-surface: #242931;
+  --accent: #8ea0ff;
+  --accent-ink: #aab8ff;
+  --accent-soft: #232a3a;
+  --accent-line: #38445f;
+  --warn: #dfae5e;
+  --warn-soft: #2a2216;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 2px 3px rgb(0 0 0 / 0.3), 0 8px 18px -8px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--accent-line); }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code, pre, .mono { font-family: var(--mono); }
+code {
+  font-size: 0.88em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+pre {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-sunken);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  overflow-x: auto;
+}
+pre code { padding: 0; border: 0; background: none; font-size: inherit; }
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px clamp(16px, 4vw, 32px);
+  background: color-mix(in oklab, var(--paper) 88%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  border-bottom: 1px solid var(--line);
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 12px 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 510;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: color 140ms var(--ease-out), border-color 140ms var(--ease-out),
+    background-color 140ms var(--ease-out);
+}
+.back:hover { color: var(--ink); border-color: var(--line-strong); background: var(--surface-raised); }
+html[data-theme="dark"] .bar { background: color-mix(in oklab, var(--blue-paper) 90%, transparent); }
+html[data-theme="dark"] .back,
+html[data-theme="dark"] .theme { background: var(--blue-surface); border-color: var(--line-2); }
+html[data-theme="dark"] .back:hover,
+html[data-theme="dark"] .theme:hover { background: color-mix(in oklab, var(--blue-surface) 78%, var(--ink)); }
+.back:active { transform: scale(0.97); }
+.back svg { width: 15px; height: 15px; }
+.bar-title { font-size: 13px; color: var(--ink-3); font-weight: 500; }
+.bar-spacer { flex: 1; }
+.theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-2);
+  box-shadow: var(--shadow-sm);
+  transition: color 140ms var(--ease-out), border-color 140ms var(--ease-out);
+}
+.theme:hover { color: var(--ink); border-color: var(--line-strong); }
+.theme svg { width: 17px; height: 17px; }
+html[data-theme="dark"] .i-moon,
+html[data-theme="light"] .i-sun { display: none; }
+
+main {
+  max-width: 760px;
+  margin-inline: auto;
+  padding: clamp(24px, 5vw, 48px) clamp(18px, 4vw, 32px) 96px;
+}
+.doc h1 {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4.6vw, 38px);
+  font-weight: 560;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin: 0 0 14px;
+}
+.doc h2 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 550;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  margin: 40px 0 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.doc h2:first-of-type { border-top: 0; padding-top: 0; margin-top: 30px; }
+.doc h3 {
+  font-size: 14px;
+  font-weight: 620;
+  letter-spacing: -0.005em;
+  margin: 26px 0 8px;
+}
+.doc p { margin: 0 0 14px; color: var(--ink-2); }
+.doc h1 + p,
+.doc .lede { font-size: 16.5px; color: var(--ink-2); }
+.doc ul, .doc ol { margin: 0 0 14px; padding-left: 20px; color: var(--ink-2); }
+.doc li { margin-bottom: 6px; }
+.doc li::marker { color: var(--ink-4); }
+.doc strong { color: var(--ink); font-weight: 620; }
+.doc img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 18px 0 6px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+}
+.doc figure { margin: 22px 0; }
+.doc figcaption { margin-top: 8px; font-size: 12px; color: var(--ink-4); }
+.doc table {
+  width: 100%;
+  margin: 16px 0;
+  border-collapse: collapse;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: clip;
+  font-variant-numeric: tabular-nums;
+}
+.doc th, .doc td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  vertical-align: top;
+}
+.doc th:last-child, .doc td:last-child { border-right: 0; }
+.doc tr:last-child td { border-bottom: 0; }
+.doc th {
+  background: var(--surface-sunken);
+  font-size: 10px;
+  font-weight: 620;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.doc td { color: var(--ink-2); }
+.doc td code { font-size: 11.5px; }
+
+.note {
+  margin: 18px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.note strong { color: var(--ink); }
+.note--warn {
+  border-color: color-mix(in oklab, var(--warn) 30%, var(--line));
+  background: var(--warn-soft);
+}
+.foot {
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--ink-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <a class="back" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path d="M14 6.5 8.5 12 14 17.5" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    Workbench
+  </a>
+  <span class="bar-title">How it works</span>
+  <span class="bar-spacer"></span>
+  <button class="theme" id="themeBtn" type="button" aria-label="Switch to dark theme" title="Switch theme">
+    <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.1" />
+      <path d="M12 3.4v1.9M12 18.7v1.9M3.4 12v1.9M18.7 12h1.9M6 6l1.35 1.35M16.65 16.65 18 18M18 6l-1.35 1.35M7.35 16.65 6 18" stroke-linecap="round" />
+    </svg>
+    <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+      <path d="M20 14.4A8.2 8.2 0 0 1 9.6 4a8.4 8.4 0 1 0 10.4 10.4z" stroke-linejoin="round" />
+    </svg>
+  </button>
+</div>
+
+<main>
+<article class="doc">
+
+  <h1>OCR Workbench</h1>
+  <p class="lede">A browser test bench for the
+    <a href="https://api-docs.deepseek.com/guides/ocr" target="_blank" rel="noreferrer noopener">DeepSeek OCR API</a>.
+    Drop a document, pick a purpose, and read the result page by page — with the
+    <code>｜ref｜</code>/<code>｜box｜</code> coordinates drawn back onto the page.</p>
+
+  <p>No build step, no dependencies, no server code. Static files, deployable to any
+    static host.</p>
+
+  <figure>
+    <img src="assets/screenshot-result.png" alt="The workbench showing a recognized page with every coordinate box drawn in place" loading="lazy" />
+    <figcaption>A recognized page with every coordinate box drawn in place.</figcaption>
+  </figure>
+
+  <h2>Run it</h2>
+  <pre><code>python3 -m http.server 4180
+open http://127.0.0.1:4180/index.html</code></pre>
+  <p>Serve over <code>http://localhost</code> — opening <code>index.html</code> as a
+    <code>file://</code> URL blocks the request with a CORS error.</p>
+
+  <h2>Bring your own key</h2>
+  <p>No key ships with this page. Paste yours via <strong>API key</strong> in the header —
+    keys come from <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer noopener">platform.deepseek.com</a>.
+    It is stored in this browser's <code>localStorage</code> only, and requests go
+    straight from the browser to <code>api.deepseek.com</code>, so nothing passes
+    through a third party.</p>
+  <p><strong>No key at all?</strong> Flip <strong>Demo</strong> in the header. Every scenario
+    then replays a real captured response from <code>demo/recorded/</code> — success for
+    all three formats, a <code>429</code>, a <code>200</code>-body gateway timeout, and the
+    intermittent empty page.</p>
+
+  <h2>What it does</h2>
+  <p><strong>Source panel.</strong> Drag a file in, or load one of the samples. Accepts PDF,
+    Word, PowerPoint and images, exactly like the API. Images and PDFs get a real
+    thumbnail (PDF via pdf.js, first page). Size, format and page count are read
+    locally before anything is sent.</p>
+
+  <p><strong>Purpose.</strong> The two documented values, with the consequence of each spelled
+    out. The API's behaviour is not symmetric, and the UI says so:</p>
+  <table>
+    <thead>
+      <tr><th>purpose</th><th>what comes back</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>text_recognition</code></td>
+        <td>Markdown. Word/PowerPoint files without images are <em>text-extracted</em>, not recognized. <strong>No tokens.</strong></td>
+      </tr>
+      <tr>
+        <td><code>rich_layout_recognition</code></td>
+        <td>Every file recognized page by page, keeping <code>｜ref｜</code>/<code>｜box｜</code> tokens with coordinates.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><strong>Result panel.</strong> Four views of the same response:</p>
+  <ul>
+    <li><strong>Document</strong> — the page with every <code>&lt;box&gt;</code> drawn in place, plus a
+      block list. Hover or focus a block to highlight its region and see its
+      coordinates. Tables preview as their header row plus a row count, never as
+      raw <code>&lt;table&gt;</code> markup — the unmodified service output lives in the Tokens
+      and JSON tabs. Zoom with − / + (50 %–300 %, click the percentage to fit); the
+      boxes stay registered to the page at every level because they are positioned
+      in page percentages, not pixels.</li>
+    <li><strong>Text</strong> — the recognized content, rendered as Markdown (headings, lists,
+      tables, emphasis). Built from DOM nodes, never <code>innerHTML</code> of API text. For
+      token responses this is the <em>stripped</em> text, so it differs from the Tokens view.</li>
+    <li><strong>Tokens</strong> — the raw page text with the special tokens highlighted, so you
+      can see exactly what the service emitted.</li>
+    <li><strong>JSON</strong> — the whole response body, downloadable.</li>
+  </ul>
+
+  <figure>
+    <img src="assets/screenshot-text.png" alt="The Text view: the recognized Markdown with real table markup rendered as a table" loading="lazy" />
+    <figcaption>The Text view: recognized Markdown with real table markup rendered as a table.</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/screenshot-table.png" alt="Table preview: parsed rows rendered as a table, with a Raw tab showing the service output" loading="lazy" />
+    <figcaption>Table preview: parsed rows rendered as a table, with a Raw tab showing the service output.</figcaption>
+  </figure>
+
+  <p>Per page you get <code>finish_reason</code> (<code>length</code> is flagged as truncated), and per
+    response the page count, token usage, elapsed time and an estimate of the bill.</p>
+
+  <h3>Opening a block</h3>
+  <p>Long text is never silently truncated: the card clamps to two lines, and clicking
+    shows the whole block. For a table it renders the parsed rows as a real table —
+    header row, sticky on scroll — with a <strong>Raw</strong> tab showing exactly what the
+    service returned, so a malformed table (nested <code>&lt;table&gt;&lt;table&gt;</code>, repeated cells)
+    can be compared against the cleaned version. <em>Copy text</em> gives TSV for tables,
+    <em>Copy JSON</em> gives type, box, raw text and parsed rows.</p>
+
+  <h3>The block dialog: result and page side by side</h3>
+  <p>The dialog opens near-fullscreen — the viewport minus a 10px void — and splits
+    into the extracted text/table on the left and the source page on the right. That
+    is the comparison the recognizer is asking you to trust: you read the cells and
+    the pixels together instead of closing the dialog to check, then reopening it to
+    check the next one.</p>
+  <ul>
+    <li><em>Hide</em> collapses the page pane. Under 860px the two panes stack, with
+      the page pane starting collapsed so the result is not squeezed on a phone.</li>
+    <li>Images and PDFs render from the local file, the pane follows the page you are
+      on, and formats with no client-side renderer say so instead of showing an empty pane.</li>
+    <li>The page pane zooms 50 %–400 % (− / +, click the percentage to fit).</li>
+    <li>A <strong>Box</strong> switch draws the opened block's coordinates on the page — only
+      that one block, opt-in, remembered across visits. The box is positioned in page
+      percentages, so it stays registered at every zoom level.</li>
+  </ul>
+
+  <h3>Whole document</h3>
+  <p>A button next to the Rendered/Raw tabs switches the left pane from the single
+    block to the OCR of every page, with the page you are on marked — so you can read
+    the full extraction without leaving the comparison. <em>Raw</em> and the copy buttons
+    follow the scope: <em>Copy text</em> copies the whole document when that scope is
+    selected, and the block otherwise. Reopening a block resets to the block scope;
+    the zoom level is kept for the page pane.</p>
+
+  <h3>The inspector bar</h3>
+  <p>Under the page there is one fixed-height row showing the hovered or focused
+    block: type, a single line of its text, and its coordinates. The line is
+    ellipsised with plain CSS, and the full text is in the DOM (and in the
+    <code>title</code> tooltip) — no JavaScript cutting, and because the row never appears
+    or disappears, hovering a block cannot shift the grid under the cursor.</p>
+
+  <h3>Errors</h3>
+  <p>Every documented failure is mapped to a cause and a next step: <code>400</code> bad form,
+    <code>401</code> key rejected, <code>402</code> no balance, <code>408</code> slow upload, <code>413</code> too large,
+    <code>429</code> 15 concurrent jobs, <code>500</code>, <code>503</code>, <code>504</code>, and the
+    <code>200</code>-with-<code>error</code>-body gateway timeout. Network and CORS failures are
+    explained rather than echoed.</p>
+
+  <h2>Things the live API does that the guide does not say</h2>
+  <p>These were found by testing against the real endpoint, and the UI handles them:</p>
+  <ol>
+    <li><strong>The rich-layout token shape is different from the guide.</strong> The docs show
+      the text <em>inside</em> the ref:
+      <pre><code>&lt;｜ref｜&gt;Revenue&lt;｜/ref｜&gt;&lt;｜box｜&gt;[[62,289,300,330]]&lt;｜/box｜&gt;</code></pre>
+      The live service instead puts the element <strong>type</strong> in the ref and the content
+      <strong>after</strong> the box:
+      <pre><code>&lt;｜ref｜&gt;sub_title&lt;｜/ref｜&gt;&lt;｜box｜&gt;[[63,87,551,146]]&lt;｜/box｜&gt; # Quarterly Report</code></pre>
+      <code>js/parse.js</code> detects both structurally (whitespace after the box means the
+      second shape) and keeps the type, so blocks are labelled <code>sub_title</code>,
+      <code>text</code>, <code>table</code> and so on.</li>
+    <li><strong><code>text_recognition</code> returns no tokens at all</strong> — it returns Markdown,
+      and HTML tables for tabular content. So "no boxes" is a normal result, not a failure.</li>
+    <li><strong>Responses can arrive with <code>status 200</code> and an <code>error</code> body</strong>,
+      because recognition starts before it can fail. The body is always checked for <code>error</code>.</li>
+    <li><strong>A page can come back empty with <code>200 OK</code>.</strong> Roughly one request in
+      three returned a blank page text during testing on the same file. The status
+      chip turns amber (<code>200 · empty</code>), the banner says so, and the toast offers
+      <em>Run again</em> — the retry normally succeeds.</li>
+    <li><strong>High-detail pages vary run to run.</strong> Two identical requests can return
+      different numbers of tokens. The UI never treats a token-free
+      <code>rich_layout_recognition</code> response as a bug.</li>
+    <li><strong><code>rich_layout_recognition</code> can mangle dense tables.</strong> On
+      <code>samples/bank-statement.pdf</code> it emits nested <code>&lt;table&gt;&lt;table&gt;</code> and repeats
+      each cell (<code>&lt;td&gt;CODE&lt;/td&gt;&lt;td&gt;CODE&lt;/td&gt;</code>). The parser collapses the
+      duplication and the workbench flags it, recommending <code>text_recognition</code>
+      for that page.</li>
+  </ol>
+  <p>Recorded responses for every claim above are in <code>demo/recorded/</code>.</p>
+
+  <h2>Files</h2>
+  <pre><code>index.html          structure
+styles.css          design system
+readme.html         this page
+js/parse.js         token parser (both token shapes)
+js/render-md.js     safe Markdown renderer for the plain-text output
+js/app.js           state machine, requests, rendering
+assets/             icon, favicon, social preview
+samples/            test documents
+demo/recorded/      real captured API responses, used by Demo mode
+tools/              headless-Chrome verification, social card source</code></pre>
+
+  <div class="note">
+    <strong>Privacy.</strong> Your API key lives in <code>localStorage</code> and is sent only to
+    <code>api.deepseek.com</code>. Demo mode sends no file anywhere — it replays recorded
+    JSON from this repository.
+  </div>
+
+  <div class="foot">
+    <span>DeepSeek OCR API</span>
+    <span>·</span>
+    <a href="https://api-docs.deepseek.com/guides/ocr" target="_blank" rel="noreferrer noopener">OCR guide</a>
+    <span>·</span>
+    <a href="https://api-docs.deepseek.com/api/ocr" target="_blank" rel="noreferrer noopener">API reference</a>
+    <span>·</span>
+    <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer noopener">API keys</a>
+  </div>
+
+</article>
+</main>
+
+<script>
+/* Match the workbench: same localStorage key, same system-preference fallback. */
+(function () {
+  "use strict";
+  var LS_THEME = "ocrw.theme";
+  var root = document.documentElement;
+  var btn = document.getElementById("themeBtn");
+
+  function apply(theme) {
+    root.dataset.theme = theme;
+    btn.setAttribute("aria-label", theme === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    try { localStorage.setItem(LS_THEME, theme); } catch (_) {}
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem(LS_THEME); } catch (_) {}
+  apply(saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+  btn.addEventListener("click", function () {
+    apply(root.dataset.theme === "dark" ? "light" : "dark");
+  });
+})();
+</script>
+</body>
+</html>

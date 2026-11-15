@@ -1,0 +1,132 @@
+<!doctype html>
+<!-- Source for assets/og-image.png (1200×630).
+     Regenerate: chrome --headless --window-size=1200,630 --screenshot=assets/og-image.png tools/og-card.html -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+
+  body {
+    background: #f2f0ea;
+    background-image: radial-gradient(120% 90% at 50% -20%, #fbfaf6 0%, transparent 65%);
+    color: #1a1915;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    align-items: center;
+    padding: 0 76px;
+    gap: 68px;
+  }
+
+  .copy { width: 560px; flex: none; }
+
+  .lockup { display: flex; align-items: center; gap: 17px; margin-bottom: 38px; }
+  .mark { width: 54px; height: 54px; border-radius: 14px; background: #1a1915; display: grid; place-items: center; }
+  .mark svg { width: 33px; height: 33px; }
+  .lockup span {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 15px; letter-spacing: .09em; text-transform: uppercase;
+    color: #6d6a60;
+  }
+
+  h1 {
+    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: 74px; font-weight: 560; letter-spacing: -0.032em; line-height: 1.02;
+  }
+  h1 em { font-style: normal; color: #3352e0; }
+
+  p.lede {
+    margin-top: 22px;
+    font-size: 23px; line-height: 1.48; color: #57544a; letter-spacing: -0.008em;
+  }
+
+  .endpoint {
+    margin-top: 40px;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 15px; color: #6d6a60;
+    display: flex; align-items: center; gap: 11px;
+  }
+  .endpoint b {
+    font-weight: 600; color: #223cb4; background: #e8ebfb;
+    border: 1px solid #b9c4f2; border-radius: 6px; padding: 3px 8px; font-size: 13px;
+  }
+
+  /* Result sheet, the signature visual: a page with boxes drawn in place. */
+  .stage {
+    flex: 1; height: 470px; border-radius: 18px;
+    background: #efece4; border: 1px solid #e2ded3;
+    display: grid; place-items: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .sheet {
+    width: 288px; height: 402px; background: #fff; border-radius: 4px;
+    border: 1px solid #e2ded3;
+    box-shadow: 0 1px 1px rgba(28,25,16,.05), 0 4px 10px -2px rgba(28,25,16,.10), 0 26px 44px -26px rgba(28,25,16,.26);
+    position: relative; padding: 26px 24px;
+  }
+  .s-title { font-family: Georgia, serif; font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: #1a1915; }
+  .s-sub { margin-top: 5px; font-size: 8px; color: #858175; }
+  .rule { height: 1px; background: #e2ded3; margin: 14px 0; }
+  .row { display: flex; justify-content: space-between; font-size: 8.5px; color: #57544a; padding: 4px 0; }
+
+  .box { position: absolute; border: 1px solid rgba(51,82,224,.62); background: rgba(51,82,224,.09); border-radius: 2px; }
+  .b1 { left: 20px; top: 22px;   width: 150px; height: 19px; }
+  .b2 { left: 20px; top: 48px;   width: 196px; height: 11px; }
+  .b3 { left: 20px; top: 112px;  width: 248px; height: 118px; }
+  .b4 { left: 20px; top: 268px;  width: 92px;  height: 14px; }
+  .b5 { left: 20px; top: 296px;  width: 232px; height: 20px; }
+
+  .chip {
+    position: absolute; right: -58px; bottom: 26px;
+    font-family: "SF Mono", ui-monospace, Menlo, monospace;
+    font-size: 10px; color: #223cb4;
+    background: #e8ebfb; border: 1px solid #b9c4f2; border-radius: 6px;
+    padding: 5px 8px; white-space: nowrap;
+    box-shadow: 0 2px 6px -2px rgba(28,25,16,.18);
+  }
+</style>
+</head>
+<body>
+  <div class="copy">
+    <div class="lockup">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#f2f0ea" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4.75 5.25h9.25l3.5 3.5v10h-12.75z"/>
+          <path d="M3.1 11h16" stroke-width="1.9"/>
+          <path d="M7.6 14h6.8" opacity=".6"/>
+          <path d="M7.6 16.6h4.2" opacity=".6"/>
+        </svg>
+      </div>
+      <span>OCR Workbench</span>
+    </div>
+
+    <h1>See what the OCR<br>API <em>actually</em> returns.</h1>
+    <p class="lede">Drop a PDF, image or Word file. Read it page by page — with every
+      <span style="font-family:'SF Mono',monospace;font-size:19px">｜box｜</span> drawn back onto the page.</p>
+
+    <div class="endpoint"><b>POST</b> api.deepseek.com/v1/tools/ocr</div>
+  </div>
+
+  <div class="stage">
+    <div class="sheet">
+      <div class="s-title">Quarterly Report</div>
+      <div class="s-sub">Prepared by the finance team · internal use only</div>
+      <div class="rule"></div>
+      <div class="row"><span>Revenue</span><span>$4,284,120</span></div>
+      <div class="row"><span>Operating costs</span><span>$2,109,880</span></div>
+      <div class="row"><span>Gross margin</span><span>48.2%</span></div>
+      <div class="row"><span>Headcount</span><span>142</span></div>
+
+      <div class="box b1"></div>
+      <div class="box b2"></div>
+      <div class="box b3"></div>
+      <div class="box b4"></div>
+      <div class="box b5"></div>
+
+      <div class="chip">[[63, 248, 945, 576]]</div>
+    </div>
+  </div>
+</body>
+</html>

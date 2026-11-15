@@ -1,0 +1,8 @@
+{
+  "error": {
+    "message": "OCR did not finish in time",
+    "type": "gateway_timeout_error",
+    "param": null,
+    "code": "gateway_timeout_error"
+  }
+}

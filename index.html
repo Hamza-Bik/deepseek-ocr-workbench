@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>OCR Workbench</title>
+<meta name="color-scheme" content="light dark" />
+<meta name="description" content="Test the DeepSeek OCR API in the browser: drop a PDF, image or Word file, then read the result page by page with every ｜box｜ drawn back onto the page." />
+
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+<link rel="manifest" href="site.webmanifest" />
+<meta name="theme-color" content="#f2f0ea" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#151517" media="(prefers-color-scheme: dark)" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="OCR Workbench" />
+<meta property="og:title" content="OCR Workbench — see what the DeepSeek OCR API actually returns" />
+<meta property="og:description" content="Drop a PDF, image or Word file. Read it page by page, with every ｜ref｜ and ｜box｜ token drawn back onto the page." />
+<meta property="og:image" content="assets/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="OCR Workbench: a document page with recognized text surrounded by coordinate boxes." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="OCR Workbench — DeepSeek OCR API" />
+<meta name="twitter:description" content="Drop a PDF, image or Word file. Read it page by page, with every ｜ref｜ and ｜box｜ token drawn back onto the page." />
+<meta name="twitter:image" content="assets/og-image.png" />
+<link rel="stylesheet" href="styles.css" />
+<script src="js/parse.js" defer></script>
+<script src="js/render-md.js" defer></script>
+<script src="js/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#requestPanel">Skip to source</a>
+
+<header class="app-header">
+  <div class="brand">
+    <span class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M4.75 5.25h9.25l3.5 3.5v10h-12.75z" stroke-linejoin="round" />
+        <path class="mark-scan" d="M3.1 11h16" />
+        <path d="M7.6 14h6.8M7.6 16.6h4.2" stroke-linecap="round" opacity=".6" />
+      </svg>
+    </span>
+    <div class="brand-copy">
+      <h1 class="brand-title">OCR Workbench</h1>
+      <p class="brand-sub"><span class="mono">POST</span> api.deepseek.com/v1/tools/ocr</p>
+    </div>
+  </div>
+
+  <div class="header-actions">
+    <button class="pill" id="demoToggle" type="button" aria-pressed="false" title="Toggle demo data">
+      <span class="pill-dot" aria-hidden="true"></span>
+      <span class="pill-text"><span class="pill-text-long">Demo data</span><span class="pill-text-short">Demo</span></span>
+    </button>
+    <button class="pill pill--key" id="keyBtn" type="button" aria-haspopup="dialog">
+      <span class="pill-dot" id="keyDot" aria-hidden="true"></span>
+      <span class="pill-text"><span class="pill-text-long">API key</span><span class="pill-text-short">Key</span></span>
+      <span class="pill-state mono" id="keyState">missing</span>
+    </button>
+    <a class="icon-btn" id="readmeBtn" href="readme.html" aria-label="How this works" title="How this works">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M5.2 4.6h6.1a2 2 0 0 1 1.5.7l.2.25.2-.25a2 2 0 0 1 1.5-.7h4.1v13.2h-5.1a1.4 1.4 0 0 0-1.1.5l-.2.25-.2-.25a1.4 1.4 0 0 0-1.1-.5H5.2z" stroke-linejoin="round" />
+        <path d="M12 5.9v12.1" stroke-linecap="round" opacity=".5" />
+        <path d="M7.6 9.1h2.1M7.6 11.6h2.1M14.3 9.1h2.1M14.3 11.6h2.1" stroke-linecap="round" opacity=".7" />
+      </svg>
+    </a>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark theme" title="Switch theme">
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.1" />
+        <path d="M12 3.4v1.9M12 18.7v1.9M3.4 12v1.9M18.7 12h1.9M6 6l1.35 1.35M16.65 16.65 18 18M18 6l-1.35 1.35M7.35 16.65 6 18" stroke-linecap="round" />
+      </svg>
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M20 14.4A8.2 8.2 0 0 1 9.6 4a8.4 8.4 0 1 0 10.4 10.4z" stroke-linejoin="round" />
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main class="workbench">
+  <!-- ─────────────────────────── Request ─────────────────────────── -->
+  <section class="panel panel--request" id="requestPanel" aria-labelledby="requestTitle">
+    <div class="panel-head">
+      <div class="panel-head-left">
+        <h2 class="panel-title" id="requestTitle">Source</h2>
+        <span class="panel-sub" id="sourceSub">no file</span>
+      </div>
+      <div class="panel-head-right">
+        <button class="text-btn" id="clearFileBtn" type="button" hidden>Clear</button>
+      </div>
+    </div>
+
+    <div class="request-body">
+      <!-- File slot -->
+      <div class="dropzone" id="dropzone" role="group" aria-labelledby="dzTitle">
+        <input type="file" id="fileInput" class="visually-hidden"
+               accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg,.webp,.gif,.bmp,.tif,.tiff,application/pdf,image/*" />
+
+        <div class="dz-empty" id="dzEmpty">
+          <span class="dz-glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M7.4 3.6h6.1l3.9 3.9v12.9h-10z" stroke-linejoin="round" />
+              <path d="M12.4 8.2v4.4M10.2 10.4l2.2-2.2 2.2 2.2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M9 17h4.6" stroke-linecap="round" opacity=".5" />
+            </svg>
+          </span>
+          <p class="dz-title" id="dzTitle">Drop a file here</p>
+          <p class="dz-sub">PDF, DOCX, PPTX, PNG, JPEG, WebP, GIF, BMP, TIFF</p>
+          <div class="dz-actions">
+            <button class="btn-secondary" id="browseBtn" type="button">Choose file</button>
+            <button class="text-btn" id="sampleBtn" type="button">or load a sample</button>
+          </div>
+          <p class="dz-limit">≤ 100 MiB · ≤ 1,000 pages</p>
+        </div>
+
+        <figure class="dz-preview" id="dzPreview" hidden>
+          <div class="sheet" id="sourceSheet">
+            <img id="previewImg" alt="" hidden />
+            <canvas id="previewCanvas" hidden></canvas>
+            <div class="sheet-fallback" id="previewFallback" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                <path d="M6.5 3.5h8l3 3v14h-11z" stroke-linejoin="round" />
+                <path d="M9.5 12h4M9.5 15h2.5" stroke-linecap="round" opacity=".5" />
+              </svg>
+              <span>No inline preview for this format</span>
+            </div>
+          </div>
+          <figcaption class="dz-filename" id="dzFilename"></figcaption>
+          <button class="dz-replace" id="replaceBtn" type="button">Replace</button>
+        </figure>
+
+        <div class="dz-over" id="dzOver" aria-hidden="true">
+          <span class="dz-over-badge">Drop to load</span>
+        </div>
+      </div>
+
+      <dl class="meta-grid" id="fileMeta" hidden>
+        <div class="meta-row"><dt>Format</dt><dd class="mono" id="metaFormat">—</dd></div>
+        <div class="meta-row"><dt>Size</dt><dd class="mono" id="metaSize">—</dd></div>
+        <div class="meta-row"><dt>Pages</dt><dd class="mono" id="metaPages">—</dd></div>
+      </dl>
+
+      <!-- Purpose -->
+      <div class="field">
+        <div class="field-head">
+          <span class="field-label">Purpose</span>
+          <span class="field-hint">sent as <span class="mono">purpose</span></span>
+        </div>
+        <div class="purpose" id="purposeGroup" role="radiogroup" aria-label="Recognition purpose">
+          <button class="purpose-opt" type="button" role="radio" data-purpose="text_recognition" aria-checked="true">
+            <span class="purpose-main">
+              <span class="purpose-name mono">text_recognition</span>
+              <span class="purpose-desc">Fast path for image-free Word/PowerPoint files. Everything else is recognized page by page.</span>
+            </span>
+            <span class="purpose-check" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.4 4.4L19 6.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </span>
+          </button>
+          <button class="purpose-opt" type="button" role="radio" data-purpose="rich_layout_recognition" aria-checked="false">
+            <span class="purpose-main">
+              <span class="purpose-name mono">rich_layout_recognition</span>
+              <span class="purpose-desc">Every file is recognized page by page, keeping <span class="mono">&lt;｜ref｜&gt;</span> and <span class="mono">&lt;｜box｜&gt;</span> tokens with coordinates.</span>
+            </span>
+            <span class="purpose-check" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.4 4.4L19 6.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </span>
+          </button>
+        </div>
+        <p class="field-note" id="purposeFileNote" hidden></p>
+      </div>
+
+      <!-- Demo scenario -->
+      <div class="demo-row" id="demoRow" hidden>
+        <span class="field-label">Demo scenario</span>
+        <div class="chips" id="demoScenarios" role="group" aria-label="Demo scenario">
+          <button class="chip" type="button" data-scenario="success" aria-pressed="true">success</button>
+          <button class="chip" type="button" data-scenario="busy" aria-pressed="false">429</button>
+          <button class="chip" type="button" data-scenario="timeout" aria-pressed="false">timeout</button>
+        </div>
+      </div>
+
+      <!-- Run -->
+      <div class="run-row">
+        <button class="btn-primary" id="runBtn" type="button">
+          <span class="btn-label">Recognize</span>
+          <span class="btn-kbd mono" aria-hidden="true">⌘↵</span>
+        </button>
+        <button class="btn-secondary btn-cancel" id="cancelBtn" type="button" hidden>Cancel</button>
+      </div>
+
+      <details class="request-detail" id="requestDetail">
+        <summary>
+          <span>Request</span>
+          <span class="summary-hint mono">curl</span>
+          <svg class="summary-arrow" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M2.2 3.6 5 6.4 7.8 3.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </summary>
+        <div class="detail-body">
+          <div class="curl">
+            <pre id="curlBlock" class="mono">curl https://api.deepseek.com/v1/tools/ocr \
+  -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+  -F purpose="text_recognition" \
+  -F file="@document.pdf"</pre>
+            <button class="icon-btn icon-btn--sm" id="copyCurlBtn" type="button" title="Copy curl" aria-label="Copy curl command">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <rect x="8.5" y="8.5" width="10" height="12" rx="2.2" />
+                <path d="M6.2 15.2A2.4 2.4 0 0 1 5 13V6.4a2.4 2.4 0 0 1 2.4-2.4h6.6" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
+          <ul class="limits">
+            <li><span>File size</span><span class="mono">100 MiB</span></li>
+            <li><span>Pages</span><span class="mono">1,000</span></li>
+            <li><span>Total time</span><span class="mono">180 s</span></li>
+            <li><span>Concurrent</span><span class="mono">15</span></li>
+            <li><span>Price</span><span class="mono">$0.225 / 1k pages</span></li>
+          </ul>
+          <p class="detail-note">A started recognition keeps running and bills if it completes — disconnecting does not stop it.</p>
+          <p class="detail-links">
+            <a href="https://api-docs.deepseek.com/guides/ocr" target="_blank" rel="noreferrer noopener">OCR guide</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://api-docs.deepseek.com/api/ocr" target="_blank" rel="noreferrer noopener">API reference</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer noopener">API keys</a>
+          </p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── Result ─────────────────────────── -->
+  <section class="panel panel--result" aria-labelledby="resultTitle">
+    <div class="panel-head">
+      <div class="panel-head-left">
+        <h2 class="panel-title" id="resultTitle">Result</h2>
+        <span class="status-chip" id="statusChip" hidden></span>
+      </div>
+      <div class="panel-head-right">
+        <div class="tabs" id="viewTabs" role="tablist" aria-label="Result view" hidden>
+          <button class="tab" type="button" role="tab" data-view="document" aria-selected="true">Document</button>
+          <button class="tab" type="button" role="tab" data-view="text" aria-selected="false">Text</button>
+          <button class="tab" type="button" role="tab" data-view="tokens" aria-selected="false">Tokens</button>
+          <button class="tab" type="button" role="tab" data-view="json" aria-selected="false">JSON</button>
+        </div>
+        <div class="tool-actions" id="toolActions" hidden>
+          <button class="icon-btn" id="copyResultBtn" type="button" title="Copy result" aria-label="Copy result">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <rect x="8.5" y="8.5" width="10" height="12" rx="2.2" />
+              <path d="M6.2 15.2A2.4 2.4 0 0 1 5 13V6.4a2.4 2.4 0 0 1 2.4-2.4h6.6" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button class="icon-btn" id="downloadBtn" type="button" title="Download JSON" aria-label="Download JSON">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M12 4.2v10.2M8.2 10.9l3.8 3.9 3.8-3.9" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M5.2 18.5h13.6" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-body" id="resultBody">
+      <!-- Empty -->
+      <div class="state state--empty" id="stateEmpty">
+        <div class="empty-card">
+          <span class="empty-glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3.4 6.2h17.2M3.4 12h9.4M3.4 17.8h13.2" stroke-linecap="round" />
+              <rect x="15.6" y="9.6" width="5" height="4.8" rx="1" />
+            </svg>
+          </span>
+          <h3 class="empty-title">Nothing recognized yet</h3>
+          <p class="empty-sub">Load a file, pick a purpose, run it. Results are page by page.</p>
+          <ul class="empty-notes">
+            <li><span class="note-k">Coordinates</span><span>normalized 0–1000 per page, top-left origin</span></li>
+            <li><span class="note-k">Tokens</span><span class="mono">&lt;｜ref｜&gt;text&lt;｜/ref｜&gt;&lt;｜box｜&gt;[[x1,y1,x2,y2]]&lt;｜/box｜&gt;</span></li>
+            <li><span class="note-k">Billing</span><span>billed per successful page; failures are free</span></li>
+          </ul>
+          <div class="empty-actions">
+            <button class="btn-secondary" id="emptySampleBtn" type="button">Load sample</button>
+            <button class="text-btn" id="emptyKeyBtn" type="button">Add API key</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="state state--progress" id="stateProgress" hidden>
+        <div class="prog">
+          <div class="prog-head">
+            <h3 class="prog-title" id="progTitle">Uploading</h3>
+            <span class="prog-elapsed mono" id="progElapsed">0.0s</span>
+          </div>
+          <div class="meter" role="progressbar" aria-labelledby="progTitle" aria-valuemin="0" aria-valuemax="100" id="progMeter">
+            <span class="meter-fill" id="progFill"></span>
+          </div>
+          <div class="heartbeat" id="heartbeat" aria-hidden="true"></div>
+          <p class="prog-note" id="progNote">The server streams keep-alive newlines until the result is ready. That is expected.</p>
+          <div class="prog-actions">
+            <button class="btn-secondary" id="cancelRunBtn" type="button">Cancel request</button>
+            <span class="prog-hint">Disconnecting does not cancel a started job.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div class="state state--error" id="stateError" hidden>
+        <div class="err">
+          <div class="err-head">
+            <span class="err-dot" aria-hidden="true"></span>
+            <h3 class="err-title" id="errTitle">Request failed</h3>
+            <span class="chip chip--status mono" id="errStatus" hidden></span>
+          </div>
+          <p class="err-why" id="errWhy"></p>
+          <div class="err-box">
+            <span class="err-box-label">Message</span>
+            <p class="err-msg mono" id="errMsg"></p>
+          </div>
+          <ul class="err-todo" id="errTodo"></ul>
+          <div class="err-actions">
+            <button class="btn-primary" id="retryBtn" type="button">Try again</button>
+            <button class="btn-secondary" id="copyErrBtn" type="button">Copy error</button>
+          </div>
+          <details class="err-raw">
+            <summary>Raw response</summary>
+            <pre class="mono" id="errRaw"></pre>
+          </details>
+        </div>
+      </div>
+
+      <!-- Success -->
+      <div class="state state--result" id="stateResult" hidden>
+        <div class="metrics" id="metrics">
+          <div class="metric"><span class="metric-k">Pages</span><span class="metric-v mono" id="mPages">—</span></div>
+          <div class="metric"><span class="metric-k">Tokens</span><span class="metric-v mono" id="mTokens">—</span></div>
+          <div class="metric"><span class="metric-k">Elapsed</span><span class="metric-v mono" id="mElapsed">—</span></div>
+          <div class="metric"><span class="metric-k">Billed</span><span class="metric-v mono" id="mBilled">—</span></div>
+        </div>
+
+        <div class="warn-banner" id="warnBanner" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M12 3.6 20.4 18.4H3.6z" stroke-linejoin="round" />
+            <path d="M12 9v4.2M12 16.1v.1" stroke-linecap="round" />
+          </svg>
+          <span id="warnText"></span>
+        </div>
+
+        <div class="page-strip" id="pageStrip" hidden role="tablist" aria-label="Page"></div>
+
+        <div class="view" id="viewDocument">
+          <div class="stage" id="stage">
+            <div class="sheet" id="resultSheet">
+              <canvas id="resultCanvas" hidden></canvas>
+              <img id="resultImg" alt="Preview of the recognized page" hidden />
+              <div class="sheet-fallback" id="resultFallback" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                  <path d="M6.5 3.5h8l3 3v14h-11z" stroke-linejoin="round" />
+                  <path d="M9.5 12h4M9.5 15h2.5" stroke-linecap="round" opacity=".5" />
+                </svg>
+                <span>No page preview — see Text, Tokens or JSON</span>
+              </div>
+              <div class="box-layer" id="boxLayer" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="stage-toolbar">
+            <span class="stage-meta mono" id="stageMeta"></span>
+            <div class="stage-tools">
+              <div class="zoom" role="group" aria-label="Page zoom">
+                <button class="icon-btn icon-btn--sm" id="zoomOutBtn" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+                <button class="zoom-value mono" id="zoomValue" type="button" title="Reset zoom">100%</button>
+                <button class="icon-btn icon-btn--sm" id="zoomInBtn" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+              </div>
+              <label class="switch">
+              <input type="checkbox" id="boxesToggle" checked />
+              <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+                <span class="switch-label">Show boxes</span>
+              </label>
+            </div>
+          </div>
+          <div class="inspect" id="inspect" data-empty="true">
+            <span class="inspect-type mono" id="inspectType" hidden></span>
+            <span class="inspect-text" id="inspectText">Hover or focus a block to inspect it</span>
+            <span class="inspect-coords mono" id="inspectCoords"></span>
+          </div>
+          <div class="blocks" id="blocksList" role="list"></div>
+        </div>
+
+        <div class="view" id="viewText" hidden>
+          <article class="prose" id="proseText"></article>
+        </div>
+
+        <div class="view" id="viewTokens" hidden>
+          <div class="prose prose--tokens" id="tokensText"></div>
+        </div>
+
+        <div class="view" id="viewJson" hidden>
+          <pre class="json mono" id="jsonPre"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- API key dialog -->
+<div class="scrim" id="keyScrim" hidden>
+  <div class="dialog" id="keyDialog" role="dialog" aria-modal="true" aria-labelledby="keyTitle" aria-describedby="keyDesc">
+    <div class="dialog-head">
+      <h2 id="keyTitle">API key</h2>
+      <button class="icon-btn icon-btn--sm" id="keyCloseBtn" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+    <p class="dialog-desc" id="keyDesc">Requests go straight from this browser to <span class="mono">api.deepseek.com</span>. The key is kept in this browser’s local storage and is never sent anywhere else.</p>
+    <div class="field">
+      <label class="field-label" for="keyInput">Key</label>
+      <div class="key-row">
+        <input id="keyInput" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false" aria-describedby="keyNote" />
+        <button class="btn-secondary btn-reveal" id="keyRevealBtn" type="button" aria-pressed="false">Show</button>
+      </div>
+      <p class="field-note" id="keyNote">platform.deepseek.com → API keys. Not needed for demo mode.</p>
+    </div>
+    <div class="dialog-actions">
+      <button class="text-btn" id="keyForgetBtn" type="button" hidden>Forget key</button>
+      <span class="dialog-spacer"></span>
+      <button class="btn-secondary" id="keyCancelBtn" type="button">Cancel</button>
+      <button class="btn-primary btn-primary--auto" id="keySaveBtn" type="button">Save &amp; test</button>
+    </div>
+  </div>
+</div>
+
+<!-- Block detail: full text, or a table rendered from its parsed rows -->
+<div class="scrim" id="blockScrim" hidden>
+  <div class="dialog dialog--block" id="blockDialog" role="dialog" aria-modal="true" aria-labelledby="blockTitle" tabindex="-1">
+    <div class="dialog-head">
+      <div class="block-dialog-head">
+        <span class="block-type mono" id="blockKind"></span>
+        <h2 id="blockTitle">Block</h2>
+        <span class="block-dialog-meta mono" id="blockMeta"></span>
+      </div>
+      <button class="icon-btn icon-btn--sm" id="blockCloseBtn" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+
+    <div class="block-subbar">
+      <div class="tabs block-tabs" id="blockTabs" role="tablist" aria-label="Block view">
+        <button class="tab" type="button" role="tab" data-block-view="rendered" aria-selected="true">Rendered</button>
+        <button class="tab" type="button" role="tab" data-block-view="raw" aria-selected="false">Raw</button>
+      </div>
+      <button class="block-scope" id="blockScopeBtn" type="button" aria-pressed="false"
+              title="Show the OCR of every page, not just this block">Whole document</button>
+    </div>
+
+    <div class="block-body">
+      <div class="block-result" id="blockResult">
+        <div class="block-rendered" id="blockRendered"></div>
+        <pre class="block-raw mono" id="blockRaw" hidden></pre>
+      </div>
+      <aside class="block-ref" id="blockRef" aria-label="Source page">
+        <div class="block-ref-head">
+          <span class="block-ref-k">Source page</span>
+          <span class="block-ref-meta mono" id="blockRefMeta"></span>
+          <label class="switch switch--ref" title="Draw the selected block's box on the page">
+            <input type="checkbox" id="refBoxesToggle" />
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            <span class="switch-label">Box</span>
+          </label>
+          <div class="zoom zoom--ref" role="group" aria-label="Page zoom">
+            <button class="icon-btn icon-btn--sm" id="refZoomOut" type="button" aria-label="Zoom page out" title="Zoom out">−</button>
+            <button class="zoom-value mono" id="refZoomValue" type="button" title="Reset zoom">100%</button>
+            <button class="icon-btn icon-btn--sm" id="refZoomIn" type="button" aria-label="Zoom page in" title="Zoom in">+</button>
+          </div>
+          <button class="text-btn block-ref-toggle" id="blockRefToggle" type="button" aria-pressed="true">Hide</button>
+        </div>
+        <div class="block-ref-stage" id="blockRefStage"></div>
+      </aside>
+    </div>
+
+    <div class="dialog-actions">
+      <button class="btn-secondary" id="blockCopyBtn" type="button">Copy text</button>
+      <button class="btn-secondary" id="blockCopyJsonBtn" type="button">Copy JSON</button>
+      <span class="dialog-spacer"></span>
+      <button class="btn-primary btn-primary--auto" id="blockDoneBtn" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-host" id="toastHost" role="status" aria-live="polite"></div>
+
+<noscript>
+  <p style="padding:24px;font:14px/1.6 system-ui">This workbench needs JavaScript to run recognitions and render the results.</p>
+</noscript>
+</body>
+</html>
